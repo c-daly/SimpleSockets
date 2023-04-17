@@ -4,6 +4,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <sendfile.h>
 
 /*
  * thread worker that handles input from 
@@ -12,14 +13,21 @@
 void* handle_socket(void* arg) {
   char client_message[8196], server_message[8196];
   int* client_sock = (int*) arg; 
+  FILE *file = fopen("server_files/test_server_file", "rb");
+  int fd = fileno(file);
   
   while(1) {
    // Receive client's message:
     if (recv(*client_sock, client_message, 
             sizeof(client_message), 0) > 0){
-     send(*client_sock, client_message, strlen(client_message), 0); 
+      char *cmd = strtok(client_message, " ");
+      //send(*client_sock, client_message, strlen(client_message), 0); 
+      sendfile(client_sock, f);
    }
-    printf("Msg from client: %s\n", client_message);
+    if(*client_message) {
+      printf("Msg from client: %s\n", strtok(client_message, " "));
+      *client_message = NULL;
+    }
   }
  
 }
